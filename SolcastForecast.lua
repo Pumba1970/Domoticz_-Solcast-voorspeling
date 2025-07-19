@@ -1,58 +1,44 @@
 return {
     on = {
-        timer = { 'every 3 hours',
-            'every 5 minutes'
-            }
+        timer = { 'every 3 hours' }
     },
     logging = {
         level = domoticz.LOG_DEBUG,
         marker = 'Solcast PV Forecast'
     },
     execute = function(dz)
+        local curlCmd = 'curl -s -o /tmp/solcast_forecast.json "https://api.solcast.com.au/rooftop_sites/af09-5546-ffe9-c4e5/forecasts?format=json&api_key=LCKPaOseaZ5eEHmGp08-IdJFGlwtS7eK"'
+        dz.log('Running curl command: ' .. curlCmd, dz.LOG_DEBUG)
+        os.execute(curlCmd)
 
-        local url = 'https://api.solcast.com.au/rooftop_sites/{site ID}/forecasts?format=json&api_key={API Key}'
-        local devices = dz.devices
+        local file = io.open('/tmp/solcast_forecast.json', 'r')
+        if not file then
+            dz.log('Kan bestand /tmp/solcast_forecast.json niet openen.', dz.LOG_ERROR)
+            return
+        end
 
-        dz.log('Ophalen Solcast forecast van: ' .. url, dz.LOG_INFO)
+        local rawJson = file:read('*all')
+        file:close()
 
-        dz.openURL({
-            url = url,
-            method = 'GET',
-            headers = {
-                ['User-Agent'] = 'Domoticz/dzVents'
-            },
-            callback = function(response)
-                dz.log('Callback bereikt', dz.LOG_DEBUG)
+        dz.log('Ontvangen JSON van Solcast: ' .. rawJson, dz.LOG_ERROR)
 
-                if not response then
-                    dz.log('Geen response ontvangen van Solcast', dz.LOG_ERROR)
-                    return
-                end
+        local data = dz.utils.fromJSON(rawJson)
+        if not data or not data.forecasts then
+            dz.log('❌ Geen geldige forecast data van Solcast.', dz.LOG_ERROR)
+            return
+        end
 
-                dz.log('Response status: ' .. tostring(response.status), dz.LOG_DEBUG)
+        dz.log('✅ Forecast entries ontvangen: ' .. #data.forecasts, dz.LOG_INFO)
+        
+        -- (Je kunt hier nu je verwerking van de forecast toevoegen...)
+        -- Bijvoorbeeld per dag optellen, apparaten updaten, enz.
 
-                if response.status ~= 200 then
-                    dz.log('HTTP fout bij ophalen Solcast: ' .. response.status, dz.LOG_ERROR)
-                    return
-                end
-
-                dz.log('Raw response data: ' .. tostring(response.data):sub(1, 200), dz.LOG_DEBUG)
-
-                local data = dz.utils.fromJSON(response.data)
-                if not data or not data.forecasts then
-                    dz.log('Geen geldige forecast data ontvangen.', dz.LOG_ERROR)
-                    return
-                end
-
-                dz.log('Ontvangen ' .. #data.forecasts .. ' forecast entries', dz.LOG_INFO)
-
-                -- [Hier kun je verdergaan met forecast verwerking zoals eerder]
-                -- Als test:
-                for i = 1, math.min(3, #data.forecasts) do
-                    local f = data.forecasts[i]
-                    dz.log(string.format("Forecast %d: %s - %.2f kW", i, f.period_end, f.pv_estimate), dz.LOG_DEBUG)
-                end
-            end
-        })
+        -- Voorbeeld eerste forecast entry loggen:
+        local first = data.forecasts[1]
+        if first then
+            dz.log(string.format('Eerste forecast: %s - %.2f kW',
+                first.period_end, first.pv_estimate or 0), dz.LOG_INFO)
+        end
     end
 }
+
