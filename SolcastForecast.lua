@@ -10,7 +10,7 @@ return {
     },
     execute = function(dz)
 
-        local url = 'https://api.solcast.com.au/rooftop_sites/af09-5546-ffe9-c4e5/forecasts?format=json&api_key=LCKPaOseaZ5eEHmGp08-IdJFGlwtS7eK'
+        local url = 'https://api.solcast.com.au/rooftop_sites/{site ID}/forecasts?format=json&api_key={API Key}'
         local devices = dz.devices
 
         dz.log('Ophalen Solcast forecast van: ' .. url, dz.LOG_INFO)
