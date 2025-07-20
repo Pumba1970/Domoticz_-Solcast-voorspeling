@@ -1,6 +1,19 @@
 return {
     on = {
-        timer = { "every 5 minutes" }
+        timer = {
+            "at 07:00",
+            "at 09:00",
+            "at 10:00",
+            "at 11:00",
+            "at 12:00",
+            "at 13:00",
+            "at 14:00",
+            "at 15:00",
+            "at 16:00",
+            "at 17:00",
+            "at 18:00",
+            "at 19:00"
+        }
     },
     logging = {
         level = domoticz.LOG_DEBUG,
@@ -8,8 +21,8 @@ return {
     },
     execute = function(dz)
 
-        local api_key = "LCKPaOseaZ5eEHmGp08-IdJFGlwtS7eK"
-        local url = "https://api.solcast.com.au/rooftop_sites/af09-5546-ffe9-c4e5/forecasts?format=json&api_key=" .. api_key
+        local api_key = "**********************"
+        local url = "https://api.solcast.com.au/rooftop_sites/****-****-****-****/forecasts?format=json&api_key=" .. api_key
         local filePath = "/opt/domoticz/userdata/scripts/dzVents/data/solcast_forecast.json"
 
         -- Roep curl aan om JSON data op te halen
