@@ -16,7 +16,7 @@ return {
         }
     },
     logging = {
-        level = domoticz.LOG_DEBUG,
+        level = domoticz.LOG_INFO,
         marker = "Solcast PV Forecast"
     },
     execute = function(dz)
